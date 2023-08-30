@@ -2,18 +2,14 @@
 CSCI 480 - Assignment 1 - Fall 2023
 
 Progammer: Matt Borek
-Section:   Your section number goes here
-TA:        Your Teaching Assistant's name goes here
-Date Due:  The assignment due date goes here
+Section:   1
+TA:        Sai Dinesh Reddy Bandi
+Date Due:  September 10, 2023
 
-Purpose:   A brief (2-4 sentences) description of what the program does
-           goes here. For example:
-
-           This program accepts a single number from the keyboard
-           representing a temperature in Fahrenheit. It then converts
-           it to Centigrade, and displays it.
+Purpose:   This program queries the system kernel to identify key
+           information about the OS and CPU and parses it to
+           a human readable output.
 *********************************************************************/
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -24,7 +20,9 @@ int main()
 {
     CPUInfo reader;
 
-    std::cout << reader.readOSInfo() << std::endl;
+    reader.readOSInfo();
+    reader.readProcessorInfo();
+    reader.printInfo();
 
 
 
