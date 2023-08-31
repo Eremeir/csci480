@@ -15,18 +15,17 @@ Purpose:   This program queries the system kernel to identify key
 #include <string>
 #include "cpuInfo.h"
 
+#define TEST_CPU_1 0
+#define TEST_CPU_2 5
 
 int main()
 {
     CPUInfo reader;
 
     reader.readOSInfo();
-    reader.readProcessorInfo();
+    reader.readCPUInfo();
     reader.readUptime();
-    reader.printInfo();
-
-
-
+    reader.printInfo(TEST_CPU_1, TEST_CPU_2);
 
     return 0;
 }

@@ -4,17 +4,19 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "coreDetail.h"
 
 class CPUInfo
 {
 public: 
     CPUInfo();
     void readOSInfo();
-    void readProcessorInfo();
+    void readCPUInfo();
     void readUptime();
-    void readCPUState();
+    
+    void readCPUState(int cpuNum);
     void readSwapInfo();
-    void printInfo();
+    void printInfo(int testCPU1, int testCPU2);
 
 private:
     std::string osType;
@@ -22,7 +24,7 @@ private:
     std::string osRelease;
     std::string osVersion;
 
-    std::vector<std::string> processorBlocks;
+    std::vector<CoreDetail> processors;
     unsigned int numLogicalCores;
     unsigned int numPhysicalCores;
     unsigned int numSockets;
@@ -34,11 +36,8 @@ private:
 
     std::string readProcVal(const std::string &path);
     std::string printLongTime(const double &uptimeSeconds);
-
-
-
+    std::string printCPUDetal(int cpuNum);
 
 };
-
 
 #endif
