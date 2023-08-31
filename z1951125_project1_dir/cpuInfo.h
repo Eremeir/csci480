@@ -26,13 +26,17 @@ private:
     unsigned int numLogicalCores;
     unsigned int numPhysicalCores;
     unsigned int numSockets;
-    unsigned long uptimeSeconds;
+    double uptimeSeconds;
     unsigned long userTime;
     unsigned long systemTime;
     unsigned long idleTime;
     unsigned long spawSizeKB;
 
     std::string readProcVal(const std::string &path);
+    std::string printLongTime(const double &uptimeSeconds);
+
+
+
 
 };
 

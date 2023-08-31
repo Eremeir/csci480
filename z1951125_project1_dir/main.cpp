@@ -22,6 +22,7 @@ int main()
 
     reader.readOSInfo();
     reader.readProcessorInfo();
+    reader.readUptime();
     reader.printInfo();
 
 
