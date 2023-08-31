@@ -1,5 +1,6 @@
 #include "cpuInfo.h"
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 
@@ -9,6 +10,7 @@ CPUInfo::CPUInfo()
     numPhysicalCores = 0;
     numSockets = 0;
     uptimeSeconds = 0;
+    swapSizeKB = 0;
 }
 
 void CPUInfo::readOSInfo()
@@ -64,7 +66,6 @@ void CPUInfo::readCPUInfo()
             iss >> temp >> temp >> temp >> physAddrSize >> temp >> temp >> virtAddrSize;
             processors.push_back(CoreDetail(coreNum, vendor, model, physAddrSize, virtAddrSize));
         }
-        
     }
     numLogicalCores = totalProcessors;
     numSockets = totalProcessors / coresPerSocket;
@@ -90,29 +91,26 @@ void CPUInfo::readUptime()
         {
             uptimeSeconds = totalUptime;
         }
-
     }
 
     upFile.close();
 }
 
-void CPUInfo::readCPUState(int cpuNum)
+void CPUInfo::readSwapInfo()
 {
-    std::ifstream statFile("/proc/stat");
-    if(!statFile.is_open())
+    std::ifstream swapFile("/proc/swaps");
+    if(!swapFile.is_open())
     {
-        std::cerr << "Error opening stat file." << std::endl;
+        std::cerr << "Error opening swaps file." << std::endl;
         return;
     }
 
     std::string line;
-    while(std::getline(statFile, line))
-    {
-    
-    }
-
-    statFile.close();
+    std::string temp;
+    std::getline(swapFile, temp);
+    swapFile >> temp >>temp >> swapSizeKB >> temp;
 }
+
 
 void CPUInfo::printInfo(int testCPU1, int testCPU2)
 {
@@ -143,12 +141,9 @@ void CPUInfo::printInfo(int testCPU1, int testCPU2)
     std::cout << "4. The virtual address size of processor " << testCPU1 << " is " << processors.at(testCPU1).getPhysAddrSize() << " bits." << std::endl << std::endl;
 
     std::cout << "D: Questions about processor " << testCPU2 << std::endl;
-    std::cout << "1. The vendor of processor " << testCPU2 << " is " << processors.at(testCPU2).getVendor() << "." << std::endl;
-    std::cout << "2. The model name of processor " << testCPU2 << " is " << processors.at(testCPU2).getModel() << "." << std::endl;
-    std::cout << "3. The physical address size of processor " << testCPU2 << " is " << processors.at(testCPU2).getPhysAddrSize() << " bits." << std::endl;
-    std::cout << "4. The virtual address size of processor " << testCPU2 << " is " << processors.at(testCPU2).getPhysAddrSize() << " bits." << std::endl << std::endl;
+    printCPUTimes(testCPU2);
 
-    std::cout << "E. The size of " << hostname << "'s swap device is " << 0 << " MB." << std::endl << std::endl;
+    std::cout << "E. The size of " << hostname << "'s swap device is " << swapSizeKB / 1024 << " MB." << std::endl << std::endl;
 }
 
 std::string CPUInfo::readProcVal(const std::string &path)
@@ -166,9 +161,37 @@ std::string CPUInfo::readProcVal(const std::string &path)
     return val;
 }
 
-std::string CPUInfo::printLongTime(const double &uptimeSeconds)
+void CPUInfo::readCPUState(const int &cpuNum, unsigned long &userSeconds, unsigned long &sysSeconds, unsigned long &idleSeconds)
 {
-    double seconds = uptimeSeconds;
+    int BCLK = 100; //Hardcoded HZ value for turing, inaccurate elsewhere.
+    std::ifstream statFile("/proc/stat");
+    if(!statFile.is_open())
+    {
+        std::cerr << "Error opening stat file." << std::endl;
+        return;
+    }
+
+    std::string cpuString = "cpu" + std::to_string(cpuNum);
+    std::string line;
+    while(std::getline(statFile, line))
+    {
+        if(line.find(cpuString) != std::string::npos)
+        {
+            std::istringstream iss(line);
+            std::string temp;
+            iss >> temp >> userSeconds >> temp >> sysSeconds >> idleSeconds;
+        }
+    }
+    userSeconds /= BCLK;
+    sysSeconds /= BCLK;
+    idleSeconds /= BCLK;
+
+    statFile.close();
+}
+
+std::string CPUInfo::printLongTime(const double &cpuTime)
+{
+    double seconds = cpuTime;
     unsigned int days = static_cast<unsigned int>(seconds) / 86400;
     seconds -= days * 86400.0;
 
@@ -197,7 +220,17 @@ std::string CPUInfo::printLongTime(const double &uptimeSeconds)
     return longTime.str();
 }
 
-std::string CPUInfo::printCPUDetal(int cpuNum)
+void CPUInfo::printCPUTimes(int cpuNum)
 {
-    return "memes";
+    unsigned long userSeconds = 0;
+    unsigned long sysSeconds = 0;
+    unsigned long idleSeconds = 0;
+
+    readCPUState(cpuNum, userSeconds, sysSeconds, idleSeconds);
+
+    std::cout << "1. Processor " << cpuNum << " has spent " << userSeconds << " seconds in user mode." << std::endl;
+    std::cout << "2. Processor " << cpuNum << " has spent " << sysSeconds << " seconds in system mode." << std::endl;
+    std::cout << "3. Processor " << cpuNum << " has spent " << idleSeconds << " seconds in idle mode." << std::endl;
+    std::cout << "4. Processor " << cpuNum << " has spent " << printLongTime(idleSeconds) << " in idle mode." << std::endl << std::endl;
+
 }

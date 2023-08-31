@@ -10,9 +10,6 @@ Purpose:   This program queries the system kernel to identify key
            information about the OS and CPU and parses it to
            a human readable output.
 *********************************************************************/
-#include <iostream>
-#include <fstream>
-#include <string>
 #include "cpuInfo.h"
 
 #define TEST_CPU_1 0
@@ -25,6 +22,7 @@ int main()
     reader.readOSInfo();
     reader.readCPUInfo();
     reader.readUptime();
+    reader.readSwapInfo();
     reader.printInfo(TEST_CPU_1, TEST_CPU_2);
 
     return 0;

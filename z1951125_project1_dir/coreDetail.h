@@ -7,19 +7,20 @@
 class CoreDetail
 {
 public:
-    CoreDetail(const int &coreNum, const std::string &vendor, const std::string &model, const int &physAddrSize, const int &virtAddrSize);
-    const int& getCoreNum() const;
+    CoreDetail(const unsigned int &coreNum, const std::string &vendor, const std::string &model, const unsigned int &physAddrSize, const unsigned int &virtAddrSize);
+    
+    const unsigned int& getCoreNum() const;
     const std::string& getVendor() const;
     const std::string& getModel() const;
-    const int& getPhysAddrSize() const;
-    const int& getvirtAddrSize() const;
+    const unsigned int& getPhysAddrSize() const;
+    const unsigned int& getvirtAddrSize() const;
 
 private:
-    int coreNum;
+    unsigned int coreNum;
     std::string vendor;
     std::string model;
-    int physAddrSize;
-    int virtAddrSize;
+    unsigned int physAddrSize;
+    unsigned int virtAddrSize;
 
 };
 

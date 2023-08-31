@@ -1,9 +1,6 @@
 #ifndef CPU_INFO_H
 #define CPU_INFO_H
 
-#include <fstream>
-#include <string>
-#include <vector>
 #include "coreDetail.h"
 
 class CPUInfo
@@ -13,8 +10,6 @@ public:
     void readOSInfo();
     void readCPUInfo();
     void readUptime();
-    
-    void readCPUState(int cpuNum);
     void readSwapInfo();
     void printInfo(int testCPU1, int testCPU2);
 
@@ -29,14 +24,12 @@ private:
     unsigned int numPhysicalCores;
     unsigned int numSockets;
     double uptimeSeconds;
-    unsigned long userTime;
-    unsigned long systemTime;
-    unsigned long idleTime;
-    unsigned long spawSizeKB;
+    unsigned long swapSizeKB;
 
     std::string readProcVal(const std::string &path);
-    std::string printLongTime(const double &uptimeSeconds);
-    std::string printCPUDetal(int cpuNum);
+    void readCPUState(const int &cpuNum, unsigned long &userSeconds, unsigned long &sysSeconds, unsigned long &idleSeconds);
+    std::string printLongTime(const double &cpuSeconds);
+    void printCPUTimes(int cpuNum);
 
 };
 
