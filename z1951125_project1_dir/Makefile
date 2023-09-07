@@ -5,11 +5,11 @@
 
 CXX = g++
 CXXFLAGS = -g -Wall -Werror -pedantic -std=c++20
-PROGS = z1951125_project_1
+PROGS = z1951125_project1
 
 all: $(PROGS) 
 
-z1951125_project_1: main.o cpuInfo.o coreDetail.o
+z1951125_project1: main.o cpuInfo.o coreDetail.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 main.o: main.cpp cpuInfo.h

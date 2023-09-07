@@ -2,25 +2,30 @@
 #define CORE_DETAIL_H
 
 #include <string>
-#include <vector>
 
+/**
+ * @brief CoreDetail class.
+ * 
+ * Encapsulates details for an individual processor core, holding information and accessors for a core's number, vendor, model name and address sizes. 
+ * 
+ */
 class CoreDetail
 {
 public:
-    CoreDetail(const unsigned int &coreNum, const std::string &vendor, const std::string &model, const unsigned int &physAddrSize, const unsigned int &virtAddrSize);
-    
-    const unsigned int& getCoreNum() const;
-    const std::string& getVendor() const;
-    const std::string& getModel() const;
-    const unsigned int& getPhysAddrSize() const;
-    const unsigned int& getvirtAddrSize() const;
+    CoreDetail(const unsigned int &coreNum, const std::string &vendor, const std::string &model, const unsigned int &physAddrSize, const unsigned int &virtAddrSize); //Constructor
+
+    const unsigned int& getCoreNum() const;       //Get core number.
+    const std::string& getVendor() const;         //Get vendor name.
+    const std::string& getModel() const;          //Get model name.
+    const unsigned int& getPhysAddrSize() const;  //Get the physical address size.
+    const unsigned int& getvirtAddrSize() const;  //Get the virtual address size.
 
 private:
-    unsigned int coreNum;
-    std::string vendor;
-    std::string model;
-    unsigned int physAddrSize;
-    unsigned int virtAddrSize;
+    unsigned int coreNum;       //Core number of the processor
+    std::string vendor;         //Vendor name of the processor
+    std::string model;          //Model name of the processor
+    unsigned int physAddrSize;  //Physical address Size in bits
+    unsigned int virtAddrSize;  //Virtual address size in bits.
 
 };
 
