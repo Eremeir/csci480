@@ -31,5 +31,8 @@
 *.out
 *.app
 z1951125_project1
+z1951125_project2
 
+# Zips & Output Files
 *.tar
+*.txt

@@ -17,4 +17,4 @@ main.o: main.cpp
 
 .PHONY: clean
 clean:
-	rm -rf *.o $(PROGS)
+	rm -rf *.o *.txt $(PROGS)
