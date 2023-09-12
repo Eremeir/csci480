@@ -17,9 +17,42 @@ Purpose:   This program implements a microshell utilizing forks and
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <ctime>
 
 #define MAX_ARGS 64 //Maximum arguments to parse.
 
+/**
+ * @brief 
+ * 
+ * @param processCount 
+ */
+void calcFCFS(int processCount)
+{
+    srand(10);
+    int prevWaitTime = 0;
+    int waitTime = 0;
+
+    printf("FCFS CPU scheduling simulation with %d processes.\n", processCount);
+
+    for(int i = 1; i <= processCount; i++)
+    {
+        int burstTime = (rand() % 100) + 1;
+        printf("CPU burst: %d ms\n", burstTime);
+
+        waitTime += prevWaitTime;
+        prevWaitTime += burstTime;
+    }
+
+    printf("Total waiting time in the ready queue: %d ms\n", waitTime);
+    double avgWaitTime = static_cast<double>(waitTime) / processCount;
+    printf("Average waiting time in the ready queue: %.0f ms\n", avgWaitTime);
+}
+
+/**
+ * @brief 
+ * 
+ * @param buffer 
+ */
 void execCMD(char *buffer)
 {
     char *args[MAX_ARGS];
@@ -30,25 +63,34 @@ void execCMD(char *buffer)
     {
         args[argc] = token;
         argc++;
+
+        if(argc >= MAX_ARGS - 1)
+        {
+            fprintf(stderr, "Error: Too many args\n");
+            return;
+        }
+
         token = strtok(NULL, " \t\n");
     }
 
-    args[argc] = NULL; //Set last array position to NULL.
+    args[argc] = NULL; //Null terminate the array.
 
     if(argc > 0 && (strcmp(args[0], "quit") == 0 || strcmp(args[0], "q") == 0)) //Check exit conditon.
     {
         exit(0);
     }
-
+    
     char *outFile = NULL;
+    bool redirection = false;
     for(int  i = 0; i < argc; i++)
-    {
+    {   
         if(strcmp(args[i], ">") == 0)
         {
             if((i + 1) < argc)
             {
-                outFile = args[i+1];
+                outFile = args[i + 1];
                 args[i] = NULL;
+                redirection = true;
                 break;
             }
             else
@@ -58,12 +100,18 @@ void execCMD(char *buffer)
             }
         }
     }
-
-    pid_t pid = fork();
-
-    if(pid == 0)
+    
+    /*
+    if(argc > 0 && strcmp(args[0], "fcfs") == 0) //ORIGINAL NOFORK IMPLEMENTATION
     {
-        if(outFile)
+        int processCount = 5; //Default if no number specified.
+        if(argc == 2 || argc == 4)
+        {
+            processCount = atoi(args[1]);
+        } 
+        
+        int mainOutput = dup(STDOUT_FILENO); 
+        if(outFile && redirection)
         {
             int fd1 = open(outFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
             if(fd1 == -1)
@@ -78,9 +126,63 @@ void execCMD(char *buffer)
             }
 
             close(fd1); //Close file.
+
+            calcFCFS(processCount);
+
+            if (dup2(mainOutput, STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                exit(1);
+            }
+            close(mainOutput); 
+
+            return;
+        }
+        
+        calcFCFS(processCount);
+        
+        return;
+    }
+    */
+    
+    pid_t pid = fork();
+
+    if(pid == 0)
+    {
+        if(outFile && redirection)
+        {
+            int fd1 = open(outFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if(fd1 == -1)
+            {
+                perror("open");
+                exit(1);
+            }
+            if(dup2(fd1, STDOUT_FILENO) == -1)
+            {
+                perror("dup2");
+                exit(1);
+            }
+
+            close(fd1); //Close the file.
         }
 
-        if(execvp(args[0], args) == -1)
+        if(argc > 0 && strcmp(args[0], "fcfs") == 0)
+        {
+            int processCount = 5; //Default if no number specified.
+            if(argc == 2 || argc == 4)
+            {
+                processCount = atoi(args[1]);
+            }
+            else
+            {
+                perror("fcfs");
+                exit(1);
+            } 
+            
+            calcFCFS(processCount);
+            exit(0);
+        }
+        else if(execvp(args[0], args) == -1)
         {
             //perror("execvp"); Does not match refrence output when included
             exit(1);
@@ -98,11 +200,16 @@ void execCMD(char *buffer)
     }
     else
     {
-        //perror("fork");
+        perror("fork");
         exit(1);
     }
 }
 
+/**
+ * @brief 
+ * 
+ * @return int 
+ */
 int main(void)
 {
 
