@@ -97,6 +97,7 @@ void execCMD(char *buffer)
                 outFile = args[i + 1]; //Fetch output file name from next argument.
                 args[i] = NULL; //Delete redirection operator from array.
                 redirection = true; //Indicate that output should be redirected as operator has been found.
+                argc--;
                 break;
             }
             else
@@ -104,6 +105,14 @@ void execCMD(char *buffer)
                 fprintf(stderr, "Error: no output file name provided.\n");
                 return;
             }
+        }
+        else if(args[i][0] == '>') //If output rediretion operator and outfile are conjoined.
+        {
+            outFile = args[i] + 1;
+            args[i] = NULL; //Delete redirection operator from array.
+            redirection = true; //Indicate that output should be redirected as operator has been found.
+            argc--;
+            break;
         }
     }
     
@@ -113,7 +122,7 @@ void execCMD(char *buffer)
     {
         if(outFile && redirection) //If the output file has been given and command specifies to redirect
         {
-            int fd1 = open(outFile, O_WRONLY | O_CREAT | O_TRUNC, 0644); //Open new file, create and empty it with write permissions.
+            int fd1 = open(outFile, O_WRONLY | O_CREAT | O_APPEND, 0644); //Open new file, create and empty it with write permissions.
             if(fd1 == -1) //Check if file creation and opening was successful.
             {
                 perror("open");
@@ -131,7 +140,7 @@ void execCMD(char *buffer)
         if(argc > 0 && strcmp(args[0], "fcfs") == 0)  //If fcfs was found as an argument
         {
             int processCount = 5; //Default if no number specified.
-            if(argc == 2 || argc == 4) //If command is being specified with a process count argument, or with a process count argument with redirection.
+            if(argc > 1 && args[1]) //If there are at least than two arguments and the second argument isn't null.
             {
                 processCount = atoi(args[1]);
             }
@@ -172,13 +181,9 @@ void execCMD(char *buffer)
  */
 int main(void)
 {
-
-    while(1)
+    char buffer[1024];
+    while(printf("myshell>") && fgets(buffer, sizeof(buffer), stdin)) //Read input from standard input.
     {
-        printf("myshell>");
-        char buffer[1024];
-        fgets(buffer, sizeof(buffer), stdin); //Read input from standard input.
-
         if(strlen(buffer) == 1) //Check input isn't empty.
         {
             continue;
