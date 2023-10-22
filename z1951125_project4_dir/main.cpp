@@ -1,3 +1,16 @@
+/********************************************************************
+CSCI 480 - Assignment 4 - Fall 2023
+
+Progammer: Matt Borek
+Section:   1
+TA:        Sai Dinesh Reddy Bandi
+Date Due:  November 5, 2023
+
+Purpose:   This program simulates the reader-writer problem using
+           synchronized threads and semaphores.
+*********************************************************************/
+
+#include <iostream>
 #include <string>
 #include <vector>
 #include <pthread.h>
@@ -15,11 +28,12 @@ int read_count = 0;
  * Process for writer threads, synchronizes with reader threads. 
  * Removes the last character of the shared string each write.
  * 
- * @param param Unused but part of standard.
+ * @param param Pointer to a unique writer ID.
  * @return void* Function does not return with any return statements.
  */
 void *writer(void *param)
 {   
+    int writerID = *(int *)param;
     while(!sharedString.empty()) //While string is not fully unwritten.
     {
         sem_wait(&rw_sem); //Enter critical section.
@@ -31,7 +45,7 @@ void *writer(void *param)
 
         if(!sharedString.empty())
         {
-            printf("writer x is writing ...\n");
+            printf("writer %d is writing ...\n", writerID);
             fflush(stdout);
         }
 
@@ -40,7 +54,7 @@ void *writer(void *param)
         sleep(1); //Sleep for 1 second.
     }
 
-    printf("writer x is exiting ...\n");
+    printf("writer %d is exiting ...\n", writerID);
     pthread_exit(0); //Close thread.
 }
 
@@ -50,11 +64,12 @@ void *writer(void *param)
  * Process for reader threads, synchronizes with writer threads.
  * Increments and decrements read count and prints contents of shared string.
  * 
- * @param param Unused but part of standard.
+ * @param param Pointer to a unique reader ID.
  * @return void* Function does not return with any return statements.
  */
 void *reader(void* param)
 {
+    int readerID = *(int *)param;
     while(!sharedString.empty())
     {
         sem_wait(&cs_sem); //Enter critical section.
@@ -66,7 +81,7 @@ void *reader(void* param)
         }
         sem_post(&cs_sem); //Exit critical section.
 
-        printf("reader x is reading ... content : %s\n", sharedString.c_str()); //Read and print the shared string.
+        printf("reader %d is reading ... content : %s\n", readerID, sharedString.c_str()); //Read and print the shared string.
         fflush(stdout);
         
         
@@ -87,7 +102,7 @@ void *reader(void* param)
         }
     }
 
-    printf("reader x is exiting ...\n");
+    printf("reader %d is exiting ...\n", readerID);
     pthread_exit(0); //Close thread.
 }
 
@@ -105,41 +120,77 @@ void *reader(void* param)
  */
 int main(int argc, char* argv[]) //Get command line arguments.
 {
+    if(argc != 3) //If exact number of arguments provided.
+    {
+        fprintf(stderr, "Error: Invalid number of arguments. Usage: %s <numReaders> <numWriters>\n", argv[0]);
+        exit(1);
+    }
+
+    int numReaders;
+    int numWriters;
+
+    try //Ensure arguments are valid.
+    {
+        numReaders = std::stoi(argv[1]); //Number of reader actors.
+        numWriters = std::stoi(argv[2]); //Nummber of writer actors.
+    }
+    catch(const std::invalid_argument &e)
+    {
+        fprintf(stderr, "Invalid Argument: %s\n", e.what());
+        exit(1);
+    }
+
+    if(numReaders <= 0 || numWriters <= 0) //Ensure arguments are positive.
+    {
+        fprintf(stderr, "Error: numReaders and numWriters must be positive.\n");
+        exit(1);
+    }
+
     printf("*** Reader-Writer Problem Simulation *** \n");
     if(sem_init(&rw_sem, 0, 1) != 0 || sem_init(&cs_sem, 0, 1) != 0) //Initialization of semaphores.
     {   
-        perror("Semaphore initialization failed");
+        perror("Error: Semaphore initialization failed");
         return 1;
     }
 
-    int numReaders = std::stoi(argv[1]); //Number of reader actors.
     printf("Number of reader threads: %d\n", numReaders);
-    int numWriters = std::stoi(argv[2]); //Nummber of writer actors.
     printf("Number of writer threads: %d\n", numWriters);
 
     std::vector<pthread_t> readerThreads(numReaders);
-    std::vector<int> readerIds(numReaders);
+    std::vector<int> readerIDs(numReaders);
     std::vector<pthread_t> writerThreads(numWriters);
-    std::vector<int> writerIds(numWriters);
+    std::vector<int> writerIDs(numWriters);
 
-    for (int i = 0; i < numReaders; i++) //Create reader threads.
+    for(int i = 0; i < numReaders; i++) //Create reader threads.
     {
-        pthread_create(&readerThreads[i], NULL, reader, &readerIds[i]);
+        readerIDs[i] = i; //Assign the reader ID
+        int result = pthread_create(&readerThreads[i], NULL, reader, &readerIDs[i]);
+        if(result != 0) //Thread creation failed.
+        {
+            fprintf(stderr, "Error: Return code of pthread_create() on reader thread %d is %d\n", readerIDs[i], result);
+            exit(-1);
+        }
     }
 
-    for (int i = 0; i < numWriters; i++) //Create writer threads.
+    for(int j = 0; j < numWriters; j++) //Create writer threads.
     {
-        pthread_create(&writerThreads[i], NULL, writer, &writerIds[i]);
+        writerIDs[j] = j; //Assign the writer ID.
+        int result = pthread_create(&writerThreads[j], NULL, writer, &writerIDs[j]);
+        if(result != 0) //Thread creation failed.
+        {
+            fprintf(stderr, "Error: Return code of pthread_create() on writer thread %d is %d\n", writerIDs[j], result);
+            exit(-1);
+        }
     }
 
-    for (int i = 0; i < numReaders; i++) //Wait for reader threads to finish.
+    for(int i = 0; i < numReaders; i++) //Wait for reader threads to finish.
     {
         pthread_join(readerThreads[i], NULL);
     }
 
-    for (int i = 0; i < numWriters; i++) //Wait for writer threads to finish.
+    for(int j = 0; j < numWriters; j++) //Wait for writer threads to finish.
     {
-        pthread_join(writerThreads[i], NULL);
+        pthread_join(writerThreads[j], NULL);
     }
 
     printf("All threads are done. \n");
