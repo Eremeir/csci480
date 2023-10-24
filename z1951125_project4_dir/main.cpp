@@ -41,10 +41,6 @@ void *writer(void *param)
         if(!sharedString.empty()) //If non-empty, clip last character.
         {
             sharedString.pop_back();
-        }
-
-        if(!sharedString.empty())
-        {
             printf("writer %d is writing ...\n", writerID);
             fflush(stdout);
         }

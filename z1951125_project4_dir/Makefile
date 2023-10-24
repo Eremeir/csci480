@@ -4,7 +4,7 @@
 #
 
 CXX = g++
-CXXFLAGS = -g -Wall -Werror -pedantic -std=c++20 -lpthread
+CXXFLAGS = -g -Wall -Wextra -Werror -Wpedantic -std=c++20 -lpthread
 PROGS = z1951125_project4 z1951125_project4_p2
 
 all: $(PROGS) 
