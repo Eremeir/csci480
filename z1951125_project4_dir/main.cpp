@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) //Get command line arguments.
         exit(1);
     }
 
-    printf("*** Reader-Writer Problem Simulation *** \n");
+    printf("*** Reader-Writer Problem Simulation ***\n");
     if(sem_init(&rw_sem, 0, 1) != 0 || sem_init(&cs_sem, 0, 1) != 0) //Initialization of semaphores.
     {   
         perror("Error: Semaphore initialization failed");

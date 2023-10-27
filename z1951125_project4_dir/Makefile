@@ -4,19 +4,19 @@
 #
 
 CXX = g++
-CXXFLAGS = -g -Wall -Wextra -Werror -Wpedantic -std=c++20 -lpthread
+CXXFLAGS = -g -Wall -Wextra -Werror -Wpedantic -std=c++20
 PROGS = z1951125_project4 z1951125_project4_p2
 
 all: $(PROGS) 
 
 z1951125_project4: main.o 
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lpthread
 
 main.o: main.cpp 
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 z1951125_project4_p2: mainvariant.o 
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lpthread
 
 mainvariant.o: mainvariant.cpp 
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
