@@ -70,7 +70,7 @@ void *reader(void* param)
     {
         sem_wait(&cs_sem); //Enter critical section.
         read_count++;
-        printf("read_count increments to: %d\n", read_count);
+        printf("read_count increments to: %d.\n", read_count);
         if(read_count == 1)
         {
             sem_wait(&rw_sem); //First reader locks out writers.
@@ -83,7 +83,7 @@ void *reader(void* param)
         
         sem_wait(&cs_sem); //Enter critical section.
         read_count--;
-        printf("read_count decrements to: %d\n", read_count);
+        printf("read_count decrements to: %d.\n", read_count);
         if(read_count == 0)
         {
             sem_post(&rw_sem); //Last reader unlocks writers.
@@ -91,11 +91,6 @@ void *reader(void* param)
         sem_post(&cs_sem); //Exit critical section.
         
         sleep(1); //Sleep for 1 second.
-
-        if(sharedString.empty()) //Leave loop if string was unwritten during wait.
-        {
-            break;
-        }
     }
 
     printf("reader %d is exiting ...\n", readerID);

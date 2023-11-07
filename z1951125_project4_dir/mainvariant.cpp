@@ -81,11 +81,6 @@ void *reader(void* param)
         sem_post(&sem1); //Signal next writer.
         
         sleep(1); //Sleep for 1 second.
-
-        if(sharedString.empty()) //Leave loop if string was unwritten during wait.
-        {
-            break;
-        }
     }
 
     printf("reader %d is exiting ...\n", readerID);
