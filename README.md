@@ -1,2 +1,2 @@
-# csci480
-csci480 Operating Systems
+# csci480 Introduction to Operating Systems
+Classwork from assignments in C and C++.
